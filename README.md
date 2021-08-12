@@ -1,4 +1,4 @@
-<p>
+
     - Clone the repository using the master branch
     - Composer install
     - Run Migration
@@ -6,4 +6,3 @@
     - On the CLI run "php artisan queue:work" to begin processing jobs in the queue
     - Comments are added to code sections to answer bonus questions.
     
-<p>
