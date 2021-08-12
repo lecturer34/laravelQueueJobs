@@ -38,6 +38,7 @@ class CustomerJsonProcess implements ShouldQueue
     public function handle()
     {
 
+        $dataInsert = [];
         foreach ($this->data as $datum) {
             $name = $datum["name"];
             $address = $datum["address"];
@@ -53,24 +54,27 @@ class CustomerJsonProcess implements ShouldQueue
                 $datetime = strtotime(str_replace('/', '-', $date_of_birth));
                 $datetime = new Carbon($datetime);
                 $yearsfromnow = $datetime->diffInYears();
+
                 if ($yearsfromnow >= 18 && $yearsfromnow <= 65) { //Checks if age is between 18 and 65
                     $re = '/(\d)+\1\1+/';
                     $str = $credit_card_number;
-                    if (preg_match($re, $str) == 1) { //checks if credit_card_number has at least three identical digits in	sequence
-                        Customer::create([
-                            'name' => $name,
-                            'address' => $address,
-                            'checked' => $checked,
-                            'description' => $description,
-                            'interest' => $interest,
-                            'date_of_birth' => $date_of_birth,
-                            'email' => $email,
-                            'account' => $account,
-                            'credit_card_number' => $credit_card_number
-                        ]);
-                    }
+
+                    // if (preg_match($re, $str) == 1) { //checks if credit_card_number has at least three identical digits in	sequence
+                    $dataInsert[] = [
+                        'name' => $name,
+                        'address' => $address,
+                        'checked' => $checked,
+                        'description' => $description,
+                        'interest' => $interest,
+                        'date_of_birth' => $date_of_birth,
+                        'email' => $email,
+                        'account' => $account,
+                        'credit_card_number' => $credit_card_number
+                    ];
+                    // }
                 }
             }
         }
+        Customer::upsert($dataInsert, ["email"], ['name', 'address', 'checked', 'description', 'interest', 'date_of_birth', 'account', 'credit_card_number']);
     }
 }

@@ -24,7 +24,16 @@ class CustomerController extends Controller
     {
         //Upload the entire file and form subset of files
         if (request()->has('myjson')) {
+            //Read CSV
+            // $data = fgetcsv(fopen("challenge.csv", "r"));
+
+            //Read XML
+            //$data = simplexml_load_file("challenge.xml") or die("Error: Cannot create object");
+
+            //Read JSON
             $data = json_decode(file_get_contents(request()->myjson), true);
+            // if the source file gets bigger, the jobs in the queue increases, while maintaining
+            // a maximum of 100 records per job
             $chunks = array_chunk($data, 100);
             foreach ($chunks as $key => $chunk) {
                 $path = $this->path . "\mytmp{$key}.json";
@@ -34,10 +43,11 @@ class CustomerController extends Controller
 
         print("Processing jobs...<br />");
 
-        //Place jobs to be processed in a queue and remove the subset of files from directory
+
         $files = glob($this->path . "/*.json");
         foreach ($files as $file) {
             $data = json_decode(file_get_contents($file), true);
+            // php artisan queue:work
             CustomerJsonProcess::dispatch($data);
             unlink($file);
         }
