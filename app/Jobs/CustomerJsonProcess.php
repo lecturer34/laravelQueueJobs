@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Customer;
+use Carbon\Carbon;
 
 class CustomerJsonProcess implements ShouldQueue
 {
@@ -38,16 +39,38 @@ class CustomerJsonProcess implements ShouldQueue
     {
 
         foreach ($this->data as $datum) {
-            Customer::create([
-                'name' => $datum["name"],
-                'address' => $datum["address"],
-                'checked' => $datum["checked"],
-                'description' => $datum["description"],
-                'interest' => (!isset($datum["interest"])) ? 0 : 1, //Values from this field need preprocessing
-                'date_of_birth' => (!isset($datum["date_of_birth"])) ? 0 : 1, //Values from this field need preprocessing
-                'email' => $datum["email"],
-                'account' => $datum["account"]
-            ]);
+            $name = $datum["name"];
+            $address = $datum["address"];
+            $checked = $datum["checked"];
+            $description = $datum["description"];
+            $interest = $datum["interest"];
+            $date_of_birth = $datum["date_of_birth"];
+            $email = $datum["email"];
+            $account = $datum["account"];
+            $credit_card_number = $datum["credit_card"]["number"];
+
+            if (!empty(trim($date_of_birth))) {
+                $datetime = strtotime(str_replace('/', '-', $date_of_birth));
+                $datetime = new Carbon($datetime);
+                $yearsfromnow = $datetime->diffInYears();
+                if ($yearsfromnow >= 18 && $yearsfromnow <= 65) { //Checks if age is between 18 and 65
+                    $re = '/(\d)+\1\1+/';
+                    $str = $credit_card_number;
+                    if (preg_match($re, $str) == 1) { //checks if credit_card_number has at least three identical digits in	sequence
+                        Customer::create([
+                            'name' => $name,
+                            'address' => $address,
+                            'checked' => $checked,
+                            'description' => $description,
+                            'interest' => $interest,
+                            'date_of_birth' => $date_of_birth,
+                            'email' => $email,
+                            'account' => $account,
+                            'credit_card_number' => $credit_card_number
+                        ]);
+                    }
+                }
+            }
         }
     }
 }

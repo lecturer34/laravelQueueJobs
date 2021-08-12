@@ -19,10 +19,11 @@ class CreateCustomersTable extends Migration
             $table->text('address')->nullable();
             $table->string('checked')->nullable();
             $table->text('description')->nullable();
-            $table->integer('interest')->nullable();
+            $table->text('interest')->nullable();
             $table->string('date_of_birth')->nullable();
             $table->string('email')->nullable();;
             $table->bigInteger('account')->nullable();
+            $table->bigInteger('credit_card_number')->nullable();
             $table->timestamps();
         });
     }
